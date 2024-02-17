@@ -17,6 +17,10 @@ actor Assistant{
   var drugs = Map.HashMap<Nat, Drug>(0, Nat.equal, natHash);
   var nextId : Nat = 0;
 
+  public query func getDrugs(): async [Drug] {
+    Iter.toArray(drugs.vals());
+  };
+
   public query func addDrug(qrcode: Text, shelf_no: Text) : async Nat {
     let id = nextId;
     drugs.put(id, {qrcode = qrcode; expired = false });
@@ -38,5 +42,10 @@ actor Assistant{
       if (drug.expired) {output #= " !EXPIRED";};
     };
     output # "\n"
+  };
+
+  public func clearExpired() : async () {
+    drugs := Map.mapFilter<Nat, Drug, Drug>(drugs, Nat.equal, natHash,
+    func(_, drug) {if (drug.expired) null else ?drug});
   };
 }
